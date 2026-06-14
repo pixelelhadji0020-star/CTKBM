@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
-import { supabase } from '@/lib/supabase'
 import type { Product, Category, ProductOption } from '@/types'
 import { X, Plus, Upload, Loader2, Trash2 } from 'lucide-react'
 
@@ -31,14 +30,14 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
   const uploadImages = async (files: FileList) => {
     setUploading(true)
     for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop()
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { data, error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filename, file)
-      if (!uploadError && data) {
-        const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(data.path)
-        setImages(prev => [...prev, urlData.publicUrl])
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        setImages(prev => [...prev, data.url])
+      } else {
+        setError(data.error ?? 'Erreur upload image')
       }
     }
     setUploading(false)
@@ -75,12 +74,18 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
       is_available: isAvailable,
     }
 
-    const { error: dbError } = product?.id
-      ? await supabase.from('products').update(payload).eq('id', product.id)
-      : await supabase.from('products').insert(payload)
+    const url = product?.id ? `/api/products/${product.id}` : '/api/products'
+    const method = product?.id ? 'PUT' : 'POST'
 
-    if (dbError) {
-      setError(dbError.message)
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error ?? 'Erreur lors de la sauvegarde')
       setSaving(false)
       return
     }
@@ -111,6 +116,9 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
           required
           className="w-full bg-[#111111] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#C9A84C]/50"
         >
+          {categories.length === 0 && (
+            <option value="">Aucune catégorie disponible</option>
+          )}
           {categories.map(cat => (
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
@@ -219,7 +227,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
                   type="text"
                   value={opt.name}
                   onChange={(e) => updateOption(idx, { name: e.target.value })}
-                  placeholder="Nom de l'option (ex: Couleur)"
+                  placeholder="Nom de l'option"
                   className="flex-1 bg-[#1a1a1a] border border-white/5 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
                 />
                 <select
@@ -258,7 +266,9 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
         </button>
       </div>
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && (
+        <p className="text-red-400 text-sm bg-red-400/10 rounded-lg px-3 py-2">{error}</p>
+      )}
 
       {/* Actions */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-[#C9A84C]/20 p-4 flex gap-3">
