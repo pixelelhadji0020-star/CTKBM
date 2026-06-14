@@ -39,12 +39,15 @@ export default function AdminDashboard() {
   }, [router])
 
   const fetchData = useCallback(async () => {
-    const [{ data: prods }, { data: cats }] = await Promise.all([
-      supabase.from('products').select('*').order('created_at', { ascending: false }),
-      supabase.from('categories').select('*').order('name'),
+    const token = sessionStorage.getItem('admin_token')
+    const [prodsRes, catsRes] = await Promise.all([
+      fetch('/api/admin/products', { headers: { Authorization: `Bearer ${token}` } }),
+      fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${token}` } }),
     ])
-    if (prods) setProducts(prods)
-    if (cats) setCategories(cats)
+    const prods = prodsRes.ok ? await prodsRes.json() : []
+    const cats = catsRes.ok ? await catsRes.json() : []
+    setProducts(prods)
+    setCategories(cats)
   }, [])
 
   useEffect(() => {
@@ -58,7 +61,12 @@ export default function AdminDashboard() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer ce produit ?')) return
-    await supabase.from('products').delete().eq('id', id)
+    const token = sessionStorage.getItem('admin_token')
+    await fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ id }),
+    })
     fetchData()
   }
 
