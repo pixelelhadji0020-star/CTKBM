@@ -8,9 +8,16 @@ function getAdminClient() {
   )
 }
 
+function normalizeSpecs(specs: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(specs).map(([k, v]) => [k.trim(), typeof v === 'string' ? v.trim() : v])
+  )
+}
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = getAdminClient()
   const body = await req.json()
+  if (body.specs) body.specs = normalizeSpecs(body.specs)
   const { data, error } = await supabase
     .from('products').update(body).eq('id', params.id).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

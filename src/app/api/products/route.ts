@@ -18,9 +18,16 @@ export async function GET() {
   return NextResponse.json(data)
 }
 
+function normalizeSpecs(specs: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(specs).map(([k, v]) => [k.trim(), typeof v === 'string' ? v.trim() : v])
+  )
+}
+
 export async function POST(req: NextRequest) {
   const supabase = getAdminClient()
   const body = await req.json()
+  if (body.specs) body.specs = normalizeSpecs(body.specs)
   const { data, error } = await supabase.from('products').insert([body]).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)

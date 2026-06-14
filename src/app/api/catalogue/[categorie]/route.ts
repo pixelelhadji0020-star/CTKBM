@@ -36,8 +36,10 @@ export async function GET(
     .eq('is_available', true)
     .order('created_at', { ascending: false })
 
-  if (Object.keys(filterObj).length > 0) {
-    query = query.contains('specs', filterObj)
+  for (const [key, value] of Object.entries(filterObj)) {
+    if (value) {
+      query = query.filter(`specs->>${key}`, 'ilike', value.trim())
+    }
   }
 
   if (search) {
