@@ -36,4 +36,5 @@ export type WhatsAppMessageParams = {
   productName: string
   category: string
   selectedOptions: Record<string, string>
+  demande?: string
 }

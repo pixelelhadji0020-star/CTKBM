@@ -11,7 +11,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/produit/${product.id}`} className="block">
-      <div className="bg-[#111111] rounded-2xl overflow-hidden border border-[#C9A84C]/10 active:scale-[0.98] transition-transform">
+      <div className="bg-[#111111] rounded-2xl overflow-hidden border border-[#C9A84C]/10 active:scale-[0.98] transition-transform card-hover">
         <div className="relative aspect-[4/3] bg-[#1a1a1a]">
           {firstImage ? (
             <Image
@@ -34,7 +34,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="p-3">
           <h3 className="text-white font-semibold text-sm leading-tight line-clamp-2">{product.name}</h3>
-          <p className="text-[#C9A84C] italic text-xs mt-2">✦ Prix sur demande</p>
+          <div className="gold-line w-8 my-2" />
+          <p className="animate-glowPulse text-[#C9A84C] italic text-xs">✦ Prix sur demande</p>
         </div>
       </div>
     </Link>

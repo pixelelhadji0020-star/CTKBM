@@ -28,7 +28,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-black">
       <section className="flex flex-col items-center justify-center px-4 pt-12 pb-12">
         {/* Logo */}
-        <div className="relative w-32 h-32 mb-6">
+        <div className="relative w-32 h-32 mb-6 animate-float">
           <Image
             src="/logo.jpeg"
             alt="CTK&BM"
@@ -39,13 +39,13 @@ export default function HomePage() {
         </div>
 
         {/* Title */}
-        <h1 className="font-display text-3xl font-bold text-center text-white leading-tight mb-3">
+        <h1 className="font-display text-3xl font-bold text-center text-white leading-tight mb-3 animate-fadeIn">
           L&apos;Excellence,<br />
-          <span className="text-[#C9A84C]">Livrée Chez Vous</span>
+          <span className="text-shimmer">Livrée Chez Vous</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-[#9CA3AF] text-sm font-light tracking-widest uppercase text-center mb-8">
+        <p className="text-[#9CA3AF] text-sm font-light tracking-widest uppercase text-center mb-8 animate-fadeInUp" style={{ animationDelay: '0.2s', opacity: 0 }}>
           Voitures · Chaussures · Téléphones
         </p>
 
@@ -53,11 +53,12 @@ export default function HomePage() {
 
         {/* Category cards */}
         <div className="flex flex-col gap-4 w-full max-w-sm">
-          {categories.map((cat) => (
+          {categories.map((cat, idx) => (
             <Link
               key={cat.slug}
               href={`/catalogue/${cat.slug}`}
-              className="bg-[#111111] border border-[#C9A84C]/20 rounded-2xl p-5 flex items-center justify-between active:scale-[0.98] transition-transform"
+              className="bg-[#111111] border border-[#C9A84C]/20 rounded-2xl p-5 flex items-center justify-between active:scale-[0.98] transition-transform animate-fadeInUp"
+              style={{ animationDelay: `${idx * 0.15}s`, opacity: 0 }}
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[#C9A84C]/10 flex items-center justify-center">

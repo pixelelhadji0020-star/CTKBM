@@ -16,8 +16,8 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-40 h-14 bg-black/95 backdrop-blur-md border-b border-[#C9A84C]/20 flex items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+      <nav className="fixed top-0 left-0 right-0 z-40 h-14 bg-black/95 backdrop-blur-md border-b border-[#C9A84C]/20 flex items-center justify-between px-4 transition-all duration-300">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-300">
           <div className="relative w-8 h-8">
             <Image src="/logo.jpeg" alt="CTK&BM" fill className="object-contain rounded-md" />
           </div>
@@ -73,7 +73,7 @@ export default function Navbar() {
                 href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '221771018557'}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#25D366]/10 text-[#25D366]"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl btn-gold text-black font-semibold"
               >
                 <Phone className="w-5 h-5" />
                 <span className="font-medium text-sm">Contacter via WhatsApp</span>

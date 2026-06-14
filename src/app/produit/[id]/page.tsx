@@ -18,6 +18,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<ProductWithCategory | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
+  const [demande, setDemande] = useState('Achat')
 
   useEffect(() => {
     async function fetchProduct() {
@@ -58,6 +59,7 @@ export default function ProductPage() {
     productName: product.name,
     category: product.categories?.name || '',
     selectedOptions,
+    demande: product.categories?.slug === 'voitures' ? demande : undefined,
   })
 
   return (
@@ -73,7 +75,7 @@ export default function ProductPage() {
 
       {/* Image gallery */}
       {product.images.length > 0 ? (
-        <div className="overflow-x-auto flex snap-x snap-mandatory scrollbar-none">
+        <div className="overflow-x-auto flex snap-x snap-mandatory scrollbar-none animate-fadeIn">
           {product.images.map((img, idx) => (
             <div key={idx} className="flex-none w-full snap-start relative aspect-square">
               <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" priority={idx === 0} />
@@ -86,7 +88,7 @@ export default function ProductPage() {
         </div>
       )}
 
-      <div className="px-4 mt-5">
+      <div className="px-4 mt-5 animate-slideInLeft">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -163,7 +165,8 @@ export default function ProductPage() {
               {Object.entries(product.specs).map(([key, value], idx, arr) => (
                 <div
                   key={key}
-                  className={`flex items-center justify-between px-4 py-3 ${idx < arr.length - 1 ? 'border-b border-white/5' : ''}`}
+                  className={`flex items-center justify-between px-4 py-3 animate-fadeInUp ${idx < arr.length - 1 ? 'border-b border-white/5' : ''}`}
+                  style={{ animationDelay: `${idx * 0.08}s`, opacity: 0 }}
                 >
                   <span className="text-[#9CA3AF] text-sm capitalize">{key}</span>
                   <span className="text-white text-sm font-medium">{String(value)}</span>
@@ -176,11 +179,40 @@ export default function ProductPage() {
 
       {/* Sticky WhatsApp CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-[#C9A84C]/20 p-4 z-40">
+        {product.categories?.slug === 'voitures' && (
+          <div className="mb-4">
+            <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">
+              Type de demande
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDemande('Achat')}
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
+                  demande === 'Achat'
+                    ? 'bg-[#C9A84C] text-black border-[#C9A84C]'
+                    : 'bg-transparent text-gray-400 border-gray-700'
+                }`}
+              >
+                🛒 Achat
+              </button>
+              <button
+                onClick={() => setDemande('Location')}
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 ${
+                  demande === 'Location'
+                    ? 'bg-[#C9A84C] text-black border-[#C9A84C]'
+                    : 'bg-transparent text-gray-400 border-gray-700'
+                }`}
+              >
+                🔑 Location
+              </button>
+            </div>
+          </div>
+        )}
         <a
           href={whatsappURL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl text-base active:scale-[0.98] transition-transform"
+          className="flex items-center justify-center gap-2 btn-gold text-black w-full font-bold py-4 rounded-2xl text-base active:scale-[0.98]"
         >
           <MessageCircle className="w-5 h-5" />
           <span>Commander via WhatsApp</span>

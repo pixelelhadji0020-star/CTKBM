@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import type { Category, Product } from '@/types'
@@ -51,7 +51,7 @@ export default function CataloguePage() {
   return (
     <div className="min-h-screen bg-black pb-8">
       <div className="px-4 py-6 border-b border-[#C9A84C]/10">
-        <h1 className="font-display text-2xl font-bold text-white">
+        <h1 className="font-display text-2xl font-bold text-white animate-slideInLeft">
           {category?.name || ' '}
         </h1>
         {!loading && (
@@ -60,6 +60,22 @@ export default function CataloguePage() {
           </p>
         )}
       </div>
+
+      {categorie === 'voitures' && (
+        <div className="mx-4 mb-6 mt-4 p-4 rounded-2xl bg-[#111111] border border-[#C9A84C]/30 flex items-start gap-3 animate-fadeInUp">
+          <span className="text-2xl">🚗</span>
+          <div>
+            <p className="text-[#C9A84C] font-semibold text-sm">
+              Vente &amp; Location de Véhicules
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Tous nos véhicules sont disponibles à la vente ou à la location.
+              Contactez-nous via WhatsApp pour connaître les tarifs de location
+              journaliers, hebdomadaires ou mensuels.
+            </p>
+          </div>
+        </div>
+      )}
 
       {category && category.filters.length > 0 && (
         <div className="py-3">
@@ -82,8 +98,10 @@ export default function CataloguePage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 px-4 mt-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, idx) => (
+            <div key={product.id} className="animate-fadeInUp" style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}>
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       )}
