@@ -22,13 +22,19 @@ export default function AdminDashboard() {
   const [selectedCat, setSelectedCat] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    const token = sessionStorage.getItem('admin_token')
+    if (!token) {
+      router.push('/admin/login')
+      return
+    }
+    // Restaurer la session Supabase si elle n'est pas active
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) {
-        router.push('/admin/login')
-      } else {
-        setAuthed(true)
-        setLoading(false)
+        const refresh = sessionStorage.getItem('admin_refresh') ?? ''
+        await supabase.auth.setSession({ access_token: token, refresh_token: refresh })
       }
+      setAuthed(true)
+      setLoading(false)
     })
   }, [router])
 

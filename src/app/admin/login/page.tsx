@@ -14,22 +14,45 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.push('/admin/dashboard')
-    })
+    const stored = sessionStorage.getItem('admin_token')
+    if (stored) router.push('/admin/dashboard')
   }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) {
-      setError(authError.message)
-    } else {
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error ?? 'Erreur de connexion')
+        setLoading(false)
+        return
+      }
+
+      // Stocker le token et définir la session Supabase
+      sessionStorage.setItem('admin_token', data.access_token)
+      sessionStorage.setItem('admin_refresh', data.refresh_token)
+      sessionStorage.setItem('admin_email', data.user.email)
+
+      await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+      })
+
       router.push('/admin/dashboard')
+    } catch {
+      setError('Impossible de contacter le serveur')
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -74,7 +97,11 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+          {error && (
+            <p className="text-red-400 text-sm mb-4 text-center bg-red-400/10 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
