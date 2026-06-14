@@ -11,9 +11,15 @@ export default function Footer() {
           <Link href="/catalogue/chaussures" className="hover:text-[#C9A84C] transition-colors">Chaussures</Link>
           <Link href="/catalogue/telephones" className="hover:text-[#C9A84C] transition-colors">Téléphones</Link>
         </div>
-        <p className="text-[#9CA3AF] text-xs">
-          © 2025 CTK&BM. Tous droits réservés.
-        </p>
+        <div className="flex justify-between items-center">
+          <Link
+            href="/admin/login"
+            className="text-[10px] text-black hover:text-[#C9A84C]/30 transition-colors duration-500 select-none"
+          >
+            admin
+          </Link>
+          <p className="text-[#9CA3AF] text-xs">© 2025 CTK&BM</p>
+        </div>
       </div>
     </footer>
   )
