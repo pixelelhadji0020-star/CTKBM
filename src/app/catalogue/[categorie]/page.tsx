@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 import type { Category, Product } from '@/types'
 import ProductCard from '@/components/catalogue/ProductCard'
 import FilterBar from '@/components/catalogue/FilterBar'
@@ -17,41 +16,25 @@ export default function CataloguePage() {
   const [loading, setLoading] = useState(true)
   const [catError, setCatError] = useState(false)
 
-  useEffect(() => {
-    async function fetchCategory() {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('slug', categorie)
-        .single()
-      if (error || !data) {
-        setCatError(true)
-        setLoading(false)
-        return
-      }
-      setCategory(data)
-    }
-    fetchCategory()
-  }, [categorie])
-
   const fetchProducts = useCallback(async () => {
-    if (!category) return
     setLoading(true)
 
-    const activeFilters = Object.entries(selectedFilters)
-      .filter(([, v]) => v)
-      .reduce<Record<string, string>>((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+    const qs = new URLSearchParams()
+    Object.entries(selectedFilters).forEach(([k, v]) => { if (v) qs.set(k, v) })
 
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category_id', category.id)
-      .contains('specs', activeFilters)
-      .order('created_at', { ascending: false })
+    const res = await fetch(`/api/catalogue/${categorie}?${qs}`)
 
-    if (data) setProducts(data)
+    if (!res.ok) {
+      setCatError(true)
+      setLoading(false)
+      return
+    }
+
+    const data = await res.json()
+    setCategory(data.category)
+    setProducts(data.products)
     setLoading(false)
-  }, [category, selectedFilters])
+  }, [categorie, selectedFilters])
 
   useEffect(() => {
     fetchProducts()

@@ -2,34 +2,34 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { supabase } from '@/lib/supabase'
 import { buildWhatsAppURL } from '@/lib/whatsapp'
-import type { Product, Category } from '@/types'
+import type { Product } from '@/types'
 import { ArrowLeft, MessageCircle, Loader2 } from 'lucide-react'
+
+interface ProductWithCategory extends Product {
+  categories: { name: string; slug: string } | null
+}
 
 export default function ProductPage() {
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
 
-  const [product, setProduct] = useState<Product | null>(null)
-  const [category, setCategory] = useState<Category | null>(null)
+  const [product, setProduct] = useState<ProductWithCategory | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
 
   useEffect(() => {
     async function fetchProduct() {
-      const { data: prod } = await supabase.from('products').select('*').eq('id', id).single()
-      if (prod) {
-        setProduct(prod)
-        const initial: Record<string, string> = {}
-        prod.options.forEach((opt: { name: string; values: string[] }) => {
-          if (opt.values.length > 0) initial[opt.name] = opt.values[0]
-        })
-        setSelectedOptions(initial)
-        const { data: cat } = await supabase.from('categories').select('*').eq('id', prod.category_id).single()
-        if (cat) setCategory(cat)
-      }
+      const res = await fetch(`/api/produit/${id}`)
+      if (!res.ok) { setLoading(false); return }
+      const data: ProductWithCategory = await res.json()
+      setProduct(data)
+      const initial: Record<string, string> = {}
+      data.options.forEach((opt) => {
+        if (opt.values.length > 0) initial[opt.name] = opt.values[0]
+      })
+      setSelectedOptions(initial)
       setLoading(false)
     }
     fetchProduct()
@@ -56,7 +56,7 @@ export default function ProductPage() {
 
   const whatsappURL = buildWhatsAppURL({
     productName: product.name,
-    category: category?.name || '',
+    category: product.categories?.name || '',
     selectedOptions,
   })
 
@@ -90,7 +90,7 @@ export default function ProductPage() {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[#9CA3AF] text-xs uppercase tracking-wider">{category?.name}</p>
+            <p className="text-[#9CA3AF] text-xs uppercase tracking-wider">{product.categories?.name}</p>
             <h1 className="font-display text-xl font-bold text-white mt-1">{product.name}</h1>
           </div>
           {!product.is_available && (
